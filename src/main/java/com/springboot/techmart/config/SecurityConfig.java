@@ -14,6 +14,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+            .cors(cors -> {}) // Kích hoạt CORS — sử dụng CorsConfigurationSource Bean từ CorsConfig
             .csrf(AbstractHttpConfigurer::disable) // Tắt CSRF để dễ test qua Postman
             .authorizeHttpRequests(auth -> auth
                 .anyRequest().permitAll() // Tạm thời cho phép tất cả các request đi qua

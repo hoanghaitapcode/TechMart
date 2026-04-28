@@ -3,9 +3,7 @@ package com.springboot.techmart.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
@@ -14,7 +12,8 @@ import org.hibernate.annotations.SQLRestriction;
 @SQLDelete(sql = "UPDATE categories SET is_deleted = true WHERE id=?")
 @SQLRestriction("is_deleted = false")
 @Entity
-@Setter @Getter @NoArgsConstructor
+@Setter @Getter @NoArgsConstructor @AllArgsConstructor
+@Builder
 @Table(name = "categories")
 public class Category extends BaseEntity {
     // is_deleted đã được khai báo trong BaseEntity — KHÔNG cần lặp lại ở đây

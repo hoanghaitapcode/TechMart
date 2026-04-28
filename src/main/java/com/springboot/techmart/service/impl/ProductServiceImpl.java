@@ -4,12 +4,11 @@ import com.springboot.techmart.dto.request.ProductRequest;
 import com.springboot.techmart.dto.response.ProductResponse;
 import com.springboot.techmart.entity.Category;
 import com.springboot.techmart.entity.Product;
+import com.springboot.techmart.exception.ResourceNotFoundException;
 import com.springboot.techmart.repository.CategoryRepository;
 import com.springboot.techmart.repository.ProductRepository;
-import com.springboot.techmart.service.CategoryService;
 import com.springboot.techmart.service.ProductService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -21,14 +20,13 @@ import java.util.UUID;
 public class ProductServiceImpl implements ProductService {
     private final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
-    //private final ProductService productService;
 
     @Override
     public ProductResponse CreateProduct(ProductRequest request) {
 
         //validate Category
         Category category = categoryRepository.findById(request.getCategoryId())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy danh mục"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy danh mục"));
 
         Product product = new Product();
         product.setName(request.getName());
@@ -43,12 +41,14 @@ public class ProductServiceImpl implements ProductService {
         ProductResponse response = ProductResponse.fromEntity(savedProduct);
         return response;
     }
+
     @Override
     public ProductResponse GetProductById(UUID id) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm với id: " + id));
         return ProductResponse.fromEntity(product);
     }
+
     @Override
     public List<ProductResponse> GetAllProducts() {
         List<Product> products = productRepository.findAll();
@@ -58,10 +58,19 @@ public class ProductServiceImpl implements ProductService {
         }
         return responses;
     }
+
     @Override
     public ProductResponse UpdateProduct(UUID id, ProductRequest request) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm để cập nhật"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm để cập nhật"));
+
+        // Nếu categoryId thay đổi, validate category mới
+        if (request.getCategoryId() != null) {
+            Category category = categoryRepository.findById(request.getCategoryId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy danh mục"));
+            product.setCategory(category);
+        }
+
         product.setName(request.getName());
         product.setDescription(request.getDescription());
         product.setPrice(request.getPrice());
@@ -71,10 +80,11 @@ public class ProductServiceImpl implements ProductService {
 
         return ProductResponse.fromEntity(updatedProduct);
     }
+
     @Override
     public void DeleteProduct(UUID id) {
         if(!productRepository.existsById(id)) {
-            throw new RuntimeException("Không tìm thấy sản phẩm để xóa");
+            throw new ResourceNotFoundException("Không tìm thấy sản phẩm để xóa");
         }
         productRepository.deleteById(id);
     }
