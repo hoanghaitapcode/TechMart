@@ -1,0 +1,39 @@
+spring:
+  datasource:
+    # [MÔI TRƯỜNG PROD] Không chứa bất kỳ URL hardcode nào.
+    # Bắt buộc phải được cấu hình trên server (ví dụ: Render, AWS)
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    
+    hikari:
+      maximum-pool-size: 20 # Tăng pool size cho môi trường thật
+      minimum-idle: 5
+      idle-timeout: 300000
+      connection-timeout: 20000
+      max-lifetime: 1200000
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      # ⚠️ [MÔI TRƯỜNG PROD] CỰC KỲ QUAN TRỌNG: ddl-auto phải là 'validate'
+      # Nghĩa là Spring Boot chỉ kiểm tra xem bảng trong DB có khớp với Entity không.
+      # Tuyệt đối KHÔNG TỰ ĐỘNG THÊM/SỬA/XÓA BẢNG ở môi trường thật.
+      ddl-auto: validate
+    
+    # [MÔI TRƯỜNG PROD] Tắt log SQL để đỡ lag server và đỡ đầy dung lượng ổ cứng
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+        jdbc:
+          lob:
+            non_contextual_creation: true
+
+# TẮT Swagger ở môi trường Prod (Bảo mật)
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false

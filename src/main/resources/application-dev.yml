@@ -1,0 +1,42 @@
+spring:
+  datasource:
+    # URL kết nối tới Supabase (Dev)
+    url: jdbc:postgresql://aws-1-ap-southeast-1.pooler.supabase.com:6543/postgres
+    
+    # ⚠️ KỸ THUẬT BẢO MẬT: Đọc từ Biến Môi Trường (Environment Variable)
+    # Cú pháp: ${TÊN_BIẾN:Giá_trị_mặc_định}
+    # Ý nghĩa: Nếu trong máy tính có cấu hình biến DB_USERNAME thì lấy biến đó. 
+    # Nếu chưa cấu hình, nó tự động lấy giá trị đằng sau dấu hai chấm (:) để app không bị crash.
+    username: ${DB_USERNAME:postgres.modfomzzdtcagamggymk}
+    password: ${DB_PASSWORD:Jz3FnSZAq0lxssHK}
+    
+    driver-class-name: org.postgresql.Driver
+    
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      idle-timeout: 300000
+      connection-timeout: 20000
+      max-lifetime: 1200000
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      # [MÔI TRƯỜNG DEV] ddl-auto: update để thoải mái thay đổi bảng/cột
+      ddl-auto: update
+    
+    # [MÔI TRƯỜNG DEV] show-sql: true để in câu lệnh SQL ra console (dễ debug)
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          lob:
+            non_contextual_creation: true
+
+# BẬT Swagger ở môi trường Dev
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true

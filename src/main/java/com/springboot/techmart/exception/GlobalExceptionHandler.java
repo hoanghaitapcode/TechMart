@@ -2,6 +2,7 @@ package com.springboot.techmart.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -30,6 +31,12 @@ public class GlobalExceptionHandler {
                 .reduce((a, b) -> a + "; " + b)
                 .orElse("Dữ liệu không hợp lệ");
         return buildErrorResponse(HttpStatus.BAD_REQUEST, message);
+    }
+
+    @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+    public ResponseEntity<Map<String, Object>> handleOptimisticLocking(ObjectOptimisticLockingFailureException ex) {
+        // HTTP 409 Conflict là mã lỗi chuẩn nhất cho trường hợp đụng độ dữ liệu
+        return buildErrorResponse(HttpStatus.CONFLICT, "Hệ thống đang bận xử lý một giao dịch khác trên cùng tài nguyên này. Vui lòng thử lại sau!");
     }
 
     @ExceptionHandler(RuntimeException.class)

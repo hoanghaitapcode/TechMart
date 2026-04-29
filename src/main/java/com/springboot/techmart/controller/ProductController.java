@@ -22,15 +22,22 @@ import java.util.UUID;
 public class ProductController {
     private final ProductService productService;
 
+    @Operation(summary = "Tạo mới sản phẩm",
+    description = "Tạo mới một sản phẩm với thông tin chi tiết như tên, mô tả, giá cả, và danh mục. API này sẽ trả về sản phẩm vừa được tạo với mã ID duy nhất.")
     @PostMapping
     public ResponseEntity<ProductResponse> createProduct(@RequestBody ProductRequest request) {
         return new ResponseEntity<>(productService.CreateProduct(request), HttpStatus.CREATED);
     }
 
+    @Operation(
+            summary = "Lấy sản phẩm theo ID",
+            description = "Trả về một sản phẩm theo ID nhằm phục vụ việc xem chi tiết sản phẩm ở page"
+    )
     @GetMapping("/{id}")
     public ResponseEntity<ProductResponse> getProductById(@PathVariable UUID id) {
         return ResponseEntity.ok(productService.GetProductById(id));
     }
+
     @Operation(
             summary = "Lấy danh sách sản phẩm",
             description = "Trả về danh sách sản phẩm "
@@ -39,10 +46,15 @@ public class ProductController {
     public ResponseEntity<List<ProductResponse>> getAllProducts() {
         return ResponseEntity.ok(productService.GetAllProducts());
     }
+    @Operation(summary = "Cập nhật sản phẩm",
+               description = "Cập nhật thông tin sản phẩm theo ID. API này sẽ nhận vào một đối tượng ProductRequest chứa các trường cần cập nhật và trả về sản phẩm đã được cập nhật sau khi thực hiện thành công.")
     @PutMapping("/{id}")
     public ResponseEntity<ProductResponse> updateProduct(@PathVariable UUID id, @RequestBody ProductRequest request) {
         return ResponseEntity.ok(productService.UpdateProduct(id, request));
     }
+
+    @Operation(summary = "Xóa sản phẩm",
+               description = "Xóa một sản phẩm theo ID. API này sẽ thực hiện xóa sản phẩm khỏi hệ thống và trả về mã trạng thái HTTP 204 No Content nếu xóa thành công.")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProduct(@PathVariable UUID id) {
         productService.DeleteProduct(id);
