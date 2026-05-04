@@ -1,8 +1,7 @@
 package com.springboot.techmart.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -10,7 +9,7 @@ import java.util.List;
 @Entity
 @Table(name = "orders")
 @Getter
-@Setter
+@Setter @Builder @AllArgsConstructor @NoArgsConstructor
 public class Order extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id")

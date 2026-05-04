@@ -1,5 +1,5 @@
 # 📅 DEVELOPMENT ROADMAP — TechMart Backend
-**Phiên bản:** 2.0 (Cập nhật 28/04/2026)  
+**Phiên bản:** 3.0 (Cập nhật 03/05/2026)  
 **Triết lý:** Mỗi Phase học một nhóm kỹ năng cốt lõi. Phase sau XÂY TRÊN NỀN Phase trước.
 
 ---
@@ -17,6 +17,11 @@
 | 6 | Authentication | JWT, Spring Security, BCrypt | ⬜ |
 | 7 | Authorization & Admin | @PreAuthorize, Role-based Access, Statistics Query | ⬜ |
 | 8 | Testing & Polish | JUnit 5, Mockito, Integration Test | ⬜ |
+| 9 | Performance & Deployment | N+1 Query, Database Index, Docker | ⬜ |
+| | | **═══ NÂNG CAO (Advanced) ═══** | |
+| 10 | Discount & Voucher | Promotion Engine, Coupon Code, Flash Sale | ⬜ |
+| 11 | Payment Gateway | VNPay Sandbox, Webhook, Payment Strategy | ⬜ |
+| 12 | Advanced E-commerce | Review/Rating, Notification, Image Upload, Caching | ⬜ |
 
 ---
 
@@ -426,9 +431,200 @@ class OrderIntegrationTest {
 
 ---
 
+## ⬜ PHASE 9: Performance Optimization & Deployment
+
+### Mục tiêu:
+Giải quyết triệt để các vấn đề nghẽn cổ chai (Bottleneck) về hiệu năng cơ sở dữ liệu và đóng gói ứng dụng để sẵn sàng đưa lên môi trường thật.
+
+### Checklist:
+- [ ] Giải quyết lỗi N+1 Query trong toàn bộ dự án (`Product`, `Order`, `Cart`).
+- [ ] Bật `spring.jpa.properties.hibernate.generate_statistics=true` để đếm số lượng câu SQL được sinh ra.
+- [ ] Bổ sung các Index thủ công cho các cột thường xuyên tìm kiếm.
+- [ ] Đóng gói ứng dụng thành file `.jar` và chạy thử bằng dòng lệnh.
+- [ ] (Tùy chọn) Viết `Dockerfile` cơ bản cho dự án.
+
+### 📚 Kiến thức cần học:
+
+#### 1. Xử lý N+1 Query
+```java
+// Thay vì 100 queries rời rạc, ta gộp lại thành 1 query duy nhất
+@Query("SELECT p FROM Product p JOIN FETCH p.category JOIN FETCH p.vendor")
+List<Product> findAllWithCategoryAndVendor();
+```
+> **Học gì:** Phân biệt `JOIN` (chỉ dùng để lọc) và `JOIN FETCH` (dùng để kéo data lazy), cách sử dụng `@EntityGraph` để chống N+1 Query một cách gọn gàng.
+
+#### 2. Tối ưu Hibernate & Database Index
+> **Học gì:** Khái niệm B-Tree Index, Composite Index, cách dùng `EXPLAIN ANALYZE` trong PostgreSQL để đo tốc độ truy vấn trước và sau khi đánh index.
+
+---
+
+## ⬜ PHASE 10: Discount & Voucher System (Giảm giá & Mã khuyến mãi)
+
+### Mục tiêu:
+Xây dựng hệ thống khuyến mãi linh hoạt — Giảm giá trực tiếp trên sản phẩm, Voucher cho đơn hàng, Flash Sale theo khung giờ.
+
+### Checklist:
+- [ ] Thiết kế Entity `Voucher` (code, discountType, discountValue, minOrderAmount, maxUses, expiryDate)
+- [ ] Bổ sung cột `originalPrice`, `discountPrice` vào Entity `Product`
+- [ ] `VoucherService` — Tạo, áp dụng, kiểm tra hạn sử dụng
+- [ ] Cập nhật luồng Checkout: Áp dụng giảm giá sản phẩm + Voucher
+- [ ] `VoucherController` — API áp dụng voucher vào giỏ hàng
+- [ ] (Nâng cao) Flash Sale: Scheduler tự động bật/tắt giá sale theo khung giờ
+
+### 📚 Kiến thức cần học:
+
+#### 1. Strategy Pattern cho tính giá
+```java
+// Tùy loại voucher mà tính khác nhau:
+// PERCENTAGE: Giảm 20% → totalAmount * 0.8
+// FIXED_AMOUNT: Giảm 50k → totalAmount - 50000
+// FREE_SHIPPING: Miễn phí ship (khi có tính năng ship)
+public interface DiscountStrategy {
+    BigDecimal applyDiscount(BigDecimal originalAmount, BigDecimal discountValue);
+}
+```
+> **Học gì:** Design Pattern (Strategy), cách tách logic nghiệp vụ phức tạp thành các class nhỏ dễ mở rộng.
+
+#### 2. @Scheduled — Tự động bật/tắt Flash Sale
+```java
+@Scheduled(cron = "0 0 12 * * ?") // Chạy lúc 12h trưa mỗi ngày
+public void activateFlashSale() { ... }
+```
+> **Học gì:** Spring Scheduler, Cron Expression, `@EnableScheduling`.
+
+---
+
+## ⬜ PHASE 11: Payment Gateway Integration (Tích hợp cổng thanh toán)
+
+### Mục tiêu:
+Tích hợp cổng thanh toán thực tế (VNPay Sandbox) để khách hàng có thể thanh toán bằng thẻ ngân hàng, ví MoMo, QR Code... thay vì chỉ dùng ví nội bộ.
+
+### Checklist:
+- [ ] Đăng ký tài khoản VNPay Sandbox (miễn phí, dùng để test)
+- [ ] Thiết kế Entity `Payment` (orderId, method, status, transactionRef, amount)
+- [ ] Enum `PaymentMethod` (WALLET, VNPAY, COD)
+- [ ] `PaymentService` — Tạo URL thanh toán VNPay, xử lý callback
+- [ ] API `POST /api/payments/vnpay/create` — Tạo link thanh toán
+- [ ] API `GET /api/payments/vnpay/return` — VNPay redirect về sau khi thanh toán
+- [ ] API `POST /api/payments/vnpay/ipn` — Webhook nhận kết quả từ VNPay server
+- [ ] Cập nhật luồng Checkout: Cho khách chọn phương thức thanh toán
+
+### 📚 Kiến thức cần học:
+
+#### 1. Luồng thanh toán VNPay
+```
+Khách bấm "Thanh toán" → Backend tạo URL VNPay (kèm mã hóa HMAC-SHA512)
+       → Redirect khách sang trang VNPay
+       → Khách nhập thẻ / quét QR
+       → VNPay xử lý giao dịch
+       → VNPay redirect khách về URL Return của Backend
+       → Đồng thời VNPay gọi Webhook (IPN) đến Backend để xác nhận
+       → Backend verify chữ ký → Cập nhật Order status = PAID
+```
+> **Học gì:** HMAC-SHA512 (Chữ ký điện tử), Webhook Pattern, Idempotency (xử lý VNPay gọi callback nhiều lần).
+
+#### 2. Tại sao cần Webhook (IPN) bên cạnh Return URL?
+```
+Return URL: Khách redirect về → CÓ THỂ bị chặn (khách tắt trình duyệt giữa chừng)
+Webhook (IPN): VNPay server gọi trực tiếp server của bạn → LUÔN đến, không phụ thuộc khách
+→ Kết luận: Chỉ tin tưởng Webhook, Return URL chỉ để hiển thị kết quả cho khách xem.
+```
+
+#### 3. Strategy Pattern cho Payment Method
+```java
+public interface PaymentProcessor {
+    PaymentResult process(Order order, BigDecimal amount);
+}
+
+@Service("walletPayment")
+public class WalletPaymentProcessor implements PaymentProcessor { ... }
+
+@Service("vnpayPayment")
+public class VNPayPaymentProcessor implements PaymentProcessor { ... }
+
+@Service("codPayment")
+public class CODPaymentProcessor implements PaymentProcessor { ... }
+```
+> **Học gì:** Strategy Pattern thực chiến, Factory Pattern để chọn Processor phù hợp, cách thiết kế hệ thống dễ mở rộng (thêm MoMo, ZaloPay chỉ cần thêm 1 class mới).
+
+---
+
+## ⬜ PHASE 12: Advanced E-commerce Features
+
+### Mục tiêu:
+Bổ sung các tính năng nâng cao biến TechMart thành một sàn thương mại điện tử hoàn chỉnh, sẵn sàng đưa vào CV xin việc ở cấp độ Mid-level Developer.
+
+### Checklist:
+
+#### 12.1 — Review & Rating (Đánh giá sản phẩm)
+- [ ] Entity `Review` (userId, productId, rating 1-5, comment, createdAt)
+- [ ] Chỉ cho phép Review khi đã mua sản phẩm (kiểm tra OrderItem)
+- [ ] Tính `averageRating` cho Product (dùng Native SQL: AVG)
+- [ ] API: Tạo review, Xem review theo sản phẩm (có phân trang)
+
+#### 12.2 — Image Upload (Tải ảnh sản phẩm)
+- [ ] Tích hợp Cloudinary hoặc AWS S3 để lưu trữ ảnh
+- [ ] API `POST /api/uploads/image` — Upload ảnh, trả về URL
+- [ ] Hỗ trợ nhiều ảnh cho 1 sản phẩm (Entity `ProductImage`)
+- [ ] Validate: Kích thước file ≤ 5MB, chỉ chấp nhận jpg/png/webp
+
+#### 12.3 — Notification (Thông báo)
+- [ ] Entity `Notification` (userId, title, message, isRead, type)
+- [ ] Tự động tạo thông báo khi: Đặt hàng thành công, Đơn bị hủy, Có review mới
+- [ ] API: Lấy danh sách thông báo, Đánh dấu đã đọc
+- [ ] (Nâng cao) WebSocket — Push thông báo realtime
+
+#### 12.4 — Caching (Bộ nhớ đệm)
+- [ ] Tích hợp Redis hoặc Spring Cache
+- [ ] Cache danh sách Category (ít thay đổi)
+- [ ] Cache kết quả tìm kiếm phổ biến
+- [ ] `@CacheEvict` — Xóa cache khi Admin cập nhật dữ liệu
+
+#### 12.5 — Email Service
+- [ ] Tích hợp Spring Mail (SMTP Gmail hoặc Mailtrap Sandbox)
+- [ ] Gửi email xác nhận đơn hàng
+- [ ] Gửi email khi đăng ký thành công
+- [ ] Template email bằng Thymeleaf
+
+### 📚 Kiến thức cần học:
+
+#### 1. Cloudinary — Lưu trữ ảnh trên Cloud
+```java
+cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap(
+    "folder", "techmart/products",
+    "resource_type", "image"
+));
+// Trả về URL: https://res.cloudinary.com/xxx/image/upload/v123/techmart/products/abc.jpg
+```
+> **Học gì:** MultipartFile, Cloud Storage, CDN (Content Delivery Network).
+
+#### 2. WebSocket — Thông báo Realtime
+```java
+@MessageMapping("/notifications")
+@SendTo("/topic/user/{userId}")
+public Notification sendNotification(Notification notification) { ... }
+```
+> **Học gì:** WebSocket vs HTTP Polling, STOMP protocol, SockJS fallback.
+
+#### 3. Redis Cache
+```java
+@Cacheable(value = "categories", key = "'all'") // Lần 1: Query DB, Lần 2+: Lấy từ cache
+public List<CategoryResponse> getAllCategories() { ... }
+
+@CacheEvict(value = "categories", allEntries = true) // Xóa cache khi có thay đổi
+public CategoryResponse createCategory(CategoryRequest request) { ... }
+```
+> **Học gì:** Cache-aside Pattern, TTL (Time To Live), Cache Invalidation.
+
+---
+
 ## 📊 BẢN ĐỒ KIẾN THỨC TỔNG THỂ
 
 ```
+═══════════════════════════════════════════════
+  GIAI ĐOẠN 1: NỀN TẢNG (Phase 0-9)
+═══════════════════════════════════════════════
+
 Phase 0-1: CRUD & JPA Basics
     │
     ├── Entity, Repository, DTO, Validation
@@ -470,4 +666,37 @@ Phase 8: Quality Assurance
     │
     ├── Unit Test (JUnit 5 + Mockito)
     └── Integration Test (MockMvc)
+
+Phase 9: Performance & Deployment
+    │
+    ├── N+1 Query Resolution (JOIN FETCH)
+    ├── Database Indexing
+    └── Application Packaging (JAR, Docker)
+
+═══════════════════════════════════════════════
+  GIAI ĐOẠN 2: NÂNG CAO (Phase 10-12) ★★★★★
+═══════════════════════════════════════════════
+
+Phase 10: Discount & Voucher
+    │
+    ├── Promotion Engine (originalPrice → discountPrice)
+    ├── Voucher System (Coupon Code, Expiry, Usage Limit)
+    ├── Strategy Pattern (Percentage vs Fixed Amount)
+    └── @Scheduled (Flash Sale auto on/off)
+
+Phase 11: Payment Gateway ★★★★★
+    │
+    ├── VNPay Sandbox Integration
+    ├── HMAC-SHA512 (Digital Signature)
+    ├── Webhook / IPN Pattern
+    ├── Payment Strategy (Wallet / VNPay / COD)
+    └── Idempotency & Retry
+
+Phase 12: Advanced E-commerce
+    │
+    ├── Review & Rating (AVG, chỉ review khi đã mua)
+    ├── Image Upload (Cloudinary / S3)
+    ├── Notification (WebSocket realtime)
+    ├── Caching (Redis / Spring Cache)
+    └── Email Service (Spring Mail, Thymeleaf)
 ```

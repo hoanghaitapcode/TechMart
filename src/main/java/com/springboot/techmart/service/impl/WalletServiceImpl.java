@@ -11,7 +11,7 @@ import com.springboot.techmart.exception.ResourceNotFoundException;
 import com.springboot.techmart.repository.TransactionRepository;
 import com.springboot.techmart.repository.WalletRepository;
 import com.springboot.techmart.service.WalletService;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
