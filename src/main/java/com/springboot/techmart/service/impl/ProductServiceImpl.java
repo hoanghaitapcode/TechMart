@@ -1,6 +1,8 @@
 package com.springboot.techmart.service.impl;
 
 import com.springboot.techmart.dto.request.ProductRequest;
+import com.springboot.techmart.dto.request.ProductSearchCriteria;
+import com.springboot.techmart.dto.response.PageResponse;
 import com.springboot.techmart.dto.response.ProductResponse;
 import com.springboot.techmart.entity.Category;
 import com.springboot.techmart.entity.Product;
@@ -8,9 +10,13 @@ import com.springboot.techmart.exception.ResourceNotFoundException;
 import com.springboot.techmart.repository.CategoryRepository;
 import com.springboot.techmart.repository.ProductRepository;
 import com.springboot.techmart.service.ProductService;
+import com.springboot.techmart.specification.ProductSpecification;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import org.springframework.data.domain.Pageable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -87,5 +93,28 @@ public class ProductServiceImpl implements ProductService {
             throw new ResourceNotFoundException("Không tìm thấy sản phẩm để xóa");
         }
         productRepository.deleteById(id);
+    }
+
+    @Override
+    public PageResponse<ProductResponse> searchProducts(ProductSearchCriteria criteria, Pageable pageable) {
+        Specification<Product> specification = Specification.where(ProductSpecification.hasKeyWord(criteria.getKeyWord()))
+                .and(ProductSpecification.hasCategory(criteria.getCategoryId()))
+                .and(ProductSpecification.hasPriceBetween(criteria.getMinPrice(), criteria.getMaxPrice()));
+
+        Page<Product> productPage = productRepository.findAll(specification, pageable);
+        
+        List<ProductResponse> responses = new ArrayList<>();
+        for (Product product : productPage.getContent()) {
+            responses.add(ProductResponse.fromEntity(product));
+        }
+        
+        return PageResponse.<ProductResponse>builder()
+                .content(responses)
+                .page(productPage.getNumber())
+                .size(productPage.getSize())
+                .totalElements(productPage.getTotalElements())
+                .totalPages(productPage.getTotalPages())
+                .isLast(productPage.isLast())
+                .build();
     }
 }
