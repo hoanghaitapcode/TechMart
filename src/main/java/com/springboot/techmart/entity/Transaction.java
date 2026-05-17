@@ -2,8 +2,7 @@ package com.springboot.techmart.entity;
 
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 
@@ -11,6 +10,9 @@ import java.math.BigDecimal;
 @Table(name = "transactions")
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Transaction extends BaseEntity{
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "wallet_id")

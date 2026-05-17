@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 
 @Entity
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor
@@ -15,7 +17,7 @@ public class Wallet extends BaseEntity {
     @JoinColumn(name = "user_id")
     private User user;
 
-    private Double balance = 0.0;
+    private BigDecimal balance = BigDecimal.ZERO;
 
     @Version // Quan trọng cho tính toàn vẹn tài chính
     private Long version;

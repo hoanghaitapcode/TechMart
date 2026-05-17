@@ -1,15 +1,16 @@
 package com.springboot.techmart.dto.response;
 
+import com.springboot.techmart.dto.request.CategoryRequest;
 import com.springboot.techmart.entity.Category;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Getter
 @Setter
+@AllArgsConstructor
+@Builder
 @NoArgsConstructor
 public class CategoryResponse {
     private UUID id;
@@ -19,13 +20,20 @@ public class CategoryResponse {
     private LocalDateTime updatedAt;
 
     // Helper method để map từ Entity sang DTO
-    public static CategoryResponse fromEntity(Category category) {
-        CategoryResponse response = new CategoryResponse();
-        response.setId(category.getId());
-        response.setName(category.getName());
-        response.setDescription(category.getDescription());
-        response.setCreatedAt(category.getCreatedAt());
-        response.setUpdatedAt(category.getUpdatedAt());
-        return response;
+    public static CategoryResponse toResponse(Category category) {
+
+        return CategoryResponse.builder()
+                .id(category.getId())
+                .name(category.getName())
+                .description(category.getDescription())
+                .createdAt(category.getCreatedAt())
+                .updatedAt(category.getUpdatedAt())
+                .build();
+    }
+    public static Category toEntity(CategoryRequest request) {
+        return Category.builder()
+                .name(request.getName())
+                .description(request.getDescription())
+                .build();
     }
 }
