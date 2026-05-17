@@ -26,7 +26,7 @@ public class WalletController {
     private final WalletService walletService;
 
     @Operation(summary = "Lấy thông tin ví", description = "Trả về thông tin và số dư hiện tại của ví")
-    @GetMapping("/me}")
+    @GetMapping("/me")
     public ResponseEntity<WalletResponse> getWallet() {
         UUID userId = SecurityUtils.getCurrentUserId();
         return ResponseEntity.ok(walletService.getWalletByUserId(userId));
@@ -40,7 +40,7 @@ public class WalletController {
     }
 
     @Operation(summary = "Tạo giao dịch (Nạp/Rút)", description = "Dựa vào trường type (DEPOSIT hoặc WITHDRAW) trong body để xử lý")
-    @PostMapping("/{me}/transactions")
+    @PostMapping("/me/transactions")
     public ResponseEntity<WalletResponse> processTransaction(
             @Valid @RequestBody WalletActionRequest request) {
 

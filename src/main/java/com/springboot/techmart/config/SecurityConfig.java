@@ -27,8 +27,8 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable) // Tắt CSRF để dễ test qua Postman.
                 .sessionManagement(s->s.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Sử dụng JWT, không cần session
             .authorizeHttpRequests(auth -> auth
-                    .requestMatchers("api/auth/**").permitAll() //Cac endpoint liên quan đến auth (đăng nhập, đăng ký) cho phép truy cập công khai
-                    .requestMatchers("api/products/search").permitAll() // Cho phép truy cập công khai endpoint tìm kiếm sản phẩm
+                    .requestMatchers("/api/auth/**").permitAll() //Cac endpoint liên quan đến auth (đăng nhập, đăng ký) cho phép truy cập công khai
+                    .requestMatchers("/api/products/search").permitAll() // Cho phép truy cập công khai endpoint tìm kiếm sản phẩm
                     .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                     .anyRequest().authenticated() // Các endpoint khác yêu cầu xác thực
             ).addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class); // Thêm JwtAuthenticationFilter vào chuỗi filter trước UsernamePasswordAuthenticationFilter

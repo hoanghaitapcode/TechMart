@@ -48,7 +48,6 @@ public class WalletServiceImpl implements WalletService {
         Wallet wallet  = walletRepository.findByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy ví cho User có ID: " + userId));
         wallet.setBalance(wallet.getBalance().add(request.getAmount()));
-        try { Thread.sleep(5000); } catch (InterruptedException e) {}
         walletRepository.save(wallet);
 
         Transaction transaction = Transaction.builder()
@@ -57,6 +56,7 @@ public class WalletServiceImpl implements WalletService {
                 .type(Type.DEPOSIT)
                 .description("Nạp tiền vào ví")
                 .build();
+        transactionRepository.save(transaction);
         return WalletResponse.toDto(wallet);
     }
 
@@ -77,6 +77,7 @@ public class WalletServiceImpl implements WalletService {
                 .type(Type.WITHDRAW)
                 .description("Rút tiền khỏi ví")
                 .build();
+        transactionRepository.save(transaction);
         return WalletResponse.toDto(wallet);
 
     }
