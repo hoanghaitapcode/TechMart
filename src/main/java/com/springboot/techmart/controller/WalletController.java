@@ -5,6 +5,7 @@ import com.springboot.techmart.dto.response.TransactionResponse;
 import com.springboot.techmart.dto.response.WalletResponse;
 import com.springboot.techmart.entity.Type;
 import com.springboot.techmart.exception.BadRequestException;
+import com.springboot.techmart.security.SecurityUtils;
 import com.springboot.techmart.service.WalletService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -25,27 +26,28 @@ public class WalletController {
     private final WalletService walletService;
 
     @Operation(summary = "Lấy thông tin ví", description = "Trả về thông tin và số dư hiện tại của ví")
-    @GetMapping("/{userId}")
-    public ResponseEntity<WalletResponse> getWallet(@PathVariable UUID userId) {
+    @GetMapping("/me}")
+    public ResponseEntity<WalletResponse> getWallet() {
+        UUID userId = SecurityUtils.getCurrentUserId();
         return ResponseEntity.ok(walletService.getWalletByUserId(userId));
     }
 
     @Operation(summary = "Lấy lịch sử giao dịch", description = "Trả về danh sách nạp/rút tiền sắp xếp mới nhất lên đầu")
-    @GetMapping("/{userId}/transactions")
-    public ResponseEntity<List<TransactionResponse>> getTransactionHistory(@PathVariable UUID userId) {
+    @GetMapping("/me/transactions")
+    public ResponseEntity<List<TransactionResponse>> getTransactionHistory() {
+        UUID userId = SecurityUtils.getCurrentUserId();
         return ResponseEntity.ok(walletService.getTransactionHistory(userId));
     }
 
     @Operation(summary = "Tạo giao dịch (Nạp/Rút)", description = "Dựa vào trường type (DEPOSIT hoặc WITHDRAW) trong body để xử lý")
-    @PostMapping("/{userId}/transactions")
+    @PostMapping("/{me}/transactions")
     public ResponseEntity<WalletResponse> processTransaction(
-            @PathVariable UUID userId,
             @Valid @RequestBody WalletActionRequest request) {
 
         // Dựa vào Noun (Transactions) và HTTP Method (POST) ta biết đây là hành động tạo giao dịch.
         // Cụ thể là giao dịch loại gì (DEPOSIT/WITHDRAW) thì nằm trong Data Payload (Body).
         // Thiết kế này loại bỏ hoàn toàn các Động từ ra khỏi URL!
-        
+        UUID userId = SecurityUtils.getCurrentUserId();
         if (request.getType() == Type.DEPOSIT) {
             return ResponseEntity.ok(walletService.deposit(userId, request));
         } else if (request.getType() == Type.WITHDRAW) {

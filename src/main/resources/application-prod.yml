@@ -37,3 +37,6 @@ springdoc:
     enabled: false
   swagger-ui:
     enabled: false
+jwt:
+  secret: ${JWT_SECRET}  # BẮT BUỘC dùng biến môi trường, không có giá trị mặc định
+  expiration: 3600000
