@@ -1,5 +1,8 @@
 HELP.md
 
+# Environment variables — KHÔNG commit file này!
+.env
+.env.local
 
 target/
 .mvn/wrapper/maven-wrapper.jar

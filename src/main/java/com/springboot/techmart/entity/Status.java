@@ -3,9 +3,8 @@ package com.springboot.techmart.entity;
 public enum Status {
     PENDING, PAID, SHIPPING, DELIVERED, CANCELLED;
     public boolean isCancellable(){
-        if(this== SHIPPING|| this==CANCELLED){
-            return false;
-        }
-        return true;
+        // Chỉ cho phép hủy đơn hàng khi đang ở trạng thái PENDING.
+        // Sau khi đã PAID (đã trừ tiền, chuẩn bị giao), không thể hủy tùy tiện.
+        return this == PENDING;
     }
 }

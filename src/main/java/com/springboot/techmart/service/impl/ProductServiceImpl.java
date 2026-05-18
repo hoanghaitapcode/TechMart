@@ -6,9 +6,12 @@ import com.springboot.techmart.dto.response.PageResponse;
 import com.springboot.techmart.dto.response.ProductResponse;
 import com.springboot.techmart.entity.Category;
 import com.springboot.techmart.entity.Product;
+import com.springboot.techmart.entity.User;
 import com.springboot.techmart.exception.ResourceNotFoundException;
 import com.springboot.techmart.repository.CategoryRepository;
 import com.springboot.techmart.repository.ProductRepository;
+import com.springboot.techmart.repository.UserRepository;
+import com.springboot.techmart.security.SecurityUtils;
 import com.springboot.techmart.service.ProductService;
 import com.springboot.techmart.specification.ProductSpecification;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +29,7 @@ import java.util.UUID;
 public class ProductServiceImpl implements ProductService {
     private final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
+    private final UserRepository userRepository;
 
     @Override
     public ProductResponse CreateProduct(ProductRequest request) {
@@ -34,6 +38,11 @@ public class ProductServiceImpl implements ProductService {
         Category category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy danh mục"));
 
+        // Lấy vendor từ JWT Token (tránh IDOR: không tin vào vendorId do client gửi lên)
+        UUID vendorId = SecurityUtils.getCurrentUserId();
+        User vendor = userRepository.findById(vendorId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy vendor"));
+
         Product product = new Product();
         product.setName(request.getName());
         product.setDescription(request.getDescription());
@@ -41,6 +50,7 @@ public class ProductServiceImpl implements ProductService {
         product.setStockQuantity(request.getStockQuantity());
         product.setCategory(category);
         product.setImageUrl(request.getImageURL());
+        product.setVendor(vendor); // Gọn vendor từ JWT, không từ request body
 
         Product savedProduct = productRepository.save(product);
 
