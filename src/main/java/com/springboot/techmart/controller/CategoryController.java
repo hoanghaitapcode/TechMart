@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,6 +23,7 @@ public class CategoryController {
 
     private final CategoryService categoryService;
 
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Tạo mới danh mục",
             description = "Tạo mới một danh mục với thông tin chi tiết như tên và mô tả. API này sẽ trả về danh mục vừa được tạo với mã ID duy nhất. Chỉ Admin")
     @PostMapping
@@ -43,13 +45,14 @@ public class CategoryController {
         return ResponseEntity.ok(categoryService.getCategoryById(id));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Cập nhật danh mục",
             description = "Cập nhật thông tin danh mục theo ID. API này sẽ nhận vào một đối tượng CategoryRequest chứa các trường cần cập nhật và trả về danh mục đã được cập nhật sau khi thực hiện thành công. Chỉ Admin")
     @PutMapping("/{id}")
     public ResponseEntity<CategoryResponse> updateCategory(@PathVariable UUID id, @Valid @RequestBody CategoryRequest request) {
         return ResponseEntity.ok(categoryService.updateCategory(id, request));
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Xóa danh mục",
             description = "Xóa một danh mục theo ID. API này sẽ thực hiện xóa danh mục khỏi hệ thống và trả về mã trạng thái HTTP 204 No Content nếu xóa thành công. Chỉ Admin soft delete")
     @DeleteMapping("/{id}")
