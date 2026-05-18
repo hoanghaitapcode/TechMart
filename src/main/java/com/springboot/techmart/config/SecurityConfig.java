@@ -33,6 +33,7 @@ public class SecurityConfig {
                     .requestMatchers("/api/auth/**").permitAll() //Cac endpoint liên quan đến auth (đăng nhập, đăng ký) cho phép truy cập công khai
                     .requestMatchers("/api/products/search").permitAll() // Cho phép truy cập công khai endpoint tìm kiếm sản phẩm
                     .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                    .requestMatchers("/api/admin/**").hasRole("ADMIN")
                     .anyRequest().authenticated() // Các endpoint khác yêu cầu xác thực
             ).addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class); // Thêm JwtAuthenticationFilter vào chuỗi filter trước UsernamePasswordAuthenticationFilter
         return http.build();
