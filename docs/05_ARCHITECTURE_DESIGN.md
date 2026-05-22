@@ -46,6 +46,8 @@ graph LR
         C4[WalletController]
         C5[AuthController]
         C6[AdminController]
+        C7[ImageController]
+        C8[ProductVariantController]
     end
 
     subgraph Service ["🧠 Service Layer"]
@@ -56,6 +58,8 @@ graph LR
         S4[WalletService]
         S5[AuthService]
         S6[AdminService]
+        S7[ImageService]
+        S8[ProductVariantService]
     end
 
     subgraph Repository ["📦 Repository Layer"]
@@ -65,6 +69,8 @@ graph LR
         R3[OrderRepository / OrderItemRepository]
         R4[WalletRepository / TransactionRepository]
         R5[UserRepository]
+        R6[ProductImageRepository]
+        R7[ProductVariantRepository / OptionRepository]
     end
 
     C1 --> S1 --> R1
@@ -73,12 +79,21 @@ graph LR
     C4 --> S4 --> R4
     C5 --> S5 --> R5
     C6 --> S6
+    C7 --> S7 --> R6
+    C8 --> S8 --> R7
 
     S3 -.->|Gọi trừ tiền| S4
     S3 -.->|Gọi kiểm tra tồn kho| S2
 ```
 
 ---
+
+Cap nhat Product Media & Variant:
+
+- `ImageController`/`ImageService` quan ly upload, delete, set primary image cho ProductImage.
+- `ProductVariantController`/`ProductVariantService` quan ly option groups, option values va variants.
+- `OrderService` va `CartService` can doc variant de tinh gia, ton kho va snapshot selected options khi product co variants.
+- `ProductService` chi nen quan ly product cha; khong nhan `imageUrl` trong `ProductRequest`.
 
 ## 3. CẤU TRÚC PACKAGE (Project Structure)
 
@@ -168,6 +183,26 @@ src/main/java/com/springboot/techmart/
     ├── JwtAuthenticationFilter.java          #   Filter kiểm tra Token trong Header
     └── CustomUserDetailsService.java         #   Load User từ DB cho Spring Security
 ```
+
+---
+
+### 3.1 Package bo sung cho Product Media & Variant
+
+Khi triển khai product media và variant, package structure cần bổ sung:
+
+| Layer | Thành phần mới | Trách nhiệm |
+|:------|:---------------|:------------|
+| Controller | `ImageController` | Upload/delete/set primary product images |
+| Controller | `ProductVariantController` | Quản lý option groups, option values, variants |
+| Service | `ImageService`, `ImageServiceImpl` | Validate file, upload Cloudinary, lưu ProductImage |
+| Service | `ProductVariantService`, `ProductVariantServiceImpl` | Validate SKU, tổ hợp option, giá/tồn kho variant |
+| Repository | `ProductImageRepository` | Truy vấn ảnh theo product, primary image |
+| Repository | `ProductVariantRepository` | Truy vấn variant theo product/SKU |
+| Repository | `ProductOptionGroupRepository` | Truy vấn nhóm option |
+| Repository | `ProductOptionValueRepository` | Truy vấn option values |
+| Entity | `ProductImage` | Gallery/thumbnail cho Product |
+| Entity | `ProductOptionGroup`, `ProductOptionValue` | Cấu hình option |
+| Entity | `ProductVariant` | SKU bán được, có giá/tồn kho riêng |
 
 ---
 

@@ -43,3 +43,8 @@ springdoc:
 jwt:
   secret: ${JWT_SECRET:techmart-dev-secret-key-must-be-at-least-256-bits-long-for-hs256}
   expiration: 86400000
+
+cloudinary:
+  cloud-name: ${CLOUDINARY_CLOUD_NAME}
+  api-key: ${CLOUDINARY_API_KEY}
+  api-secret: ${CLOUDINARY_API_SECRET}

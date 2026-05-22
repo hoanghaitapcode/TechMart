@@ -160,7 +160,23 @@ GET /api/products?page=0&size=10&sort=price,asc
             "stockQuantity": 15,
             "categoryName": "Laptop Gaming",
             "vendorName": "TechShop VN",
-            "imageUrl": "https://...",
+            "thumbnailUrl": "https://...",
+            "images": [
+                {
+                    "id": "uuid-img-01",
+                    "imageUrl": "https://...",
+                    "isPrimary": true,
+                    "sortOrder": 0
+                }
+            ],
+            "variants": [
+                {
+                    "id": "uuid-variant-01",
+                    "sku": "ROG-G15-BLACK-I7",
+                    "price": 32990000,
+                    "stockQuantity": 15
+                }
+            ],
             "createdAt": "2026-04-27T10:00:00"
         }
     ],
@@ -199,10 +215,11 @@ POST /api/products
     "description": "Laptop gaming i7-12700H, RTX 4060",
     "price": 32990000,
     "stockQuantity": 15,
-    "categoryId": "uuid-cat-01",
-    "imageUrl": "https://example.com/rog.jpg"
+    "categoryId": "uuid-cat-01"
 }
 ```
+
+> Ảnh sản phẩm không còn truyền bằng `imageUrl` trong `ProductRequest`. Product được tạo trước, sau đó upload ảnh qua Product Image API.
 
 ### 4.4 Cập nhật sản phẩm
 ```
@@ -215,6 +232,102 @@ PUT /api/products/{id}
 DELETE /api/products/{id}
 ```
 **Auth:** Vendor sở hữu sản phẩm, ADMIN
+
+### 4.6 Upload ảnh sản phẩm
+```
+POST /api/products/{productId}/images
+Content-Type: multipart/form-data
+```
+**Auth:** Vendor sở hữu sản phẩm, ADMIN
+
+**Form-data:**
+| Field | Kiểu | Bắt buộc | Mô tả |
+|:------|:-----|:---------|:------|
+| file | MultipartFile | Có | Ảnh jpg/png/webp |
+| altText | String | Không | Text mô tả ảnh |
+| sortOrder | Integer | Không | Thứ tự hiển thị trong slider |
+| isPrimary | Boolean | Không | Đặt làm ảnh thumbnail |
+
+**Response (201 Created):**
+```json
+{
+    "id": "uuid-img-01",
+    "imageUrl": "https://res.cloudinary.com/.../iphone-black.jpg",
+    "altText": "iPhone màu đen",
+    "sortOrder": 0,
+    "isPrimary": true
+}
+```
+
+### 4.7 Quản lý option group
+```
+POST /api/products/{productId}/option-groups
+```
+**Auth:** Vendor sở hữu sản phẩm, ADMIN
+
+**Request Body:**
+```json
+{
+    "name": "Color",
+    "sortOrder": 0
+}
+```
+
+```
+POST /api/products/{productId}/option-groups/{groupId}/values
+```
+**Request Body:**
+```json
+{
+    "value": "Black",
+    "sortOrder": 0
+}
+```
+
+### 4.8 Quản lý product variants
+```
+POST /api/products/{productId}/variants
+```
+**Auth:** Vendor sở hữu sản phẩm, ADMIN
+
+**Request Body:**
+```json
+{
+    "sku": "IPHONE15-BLACK-128",
+    "price": 22990000,
+    "stockQuantity": 20,
+    "imageId": "uuid-img-01",
+    "optionValueIds": [
+        "uuid-option-black",
+        "uuid-option-128gb"
+    ]
+}
+```
+
+**Response (201 Created):**
+```json
+{
+    "id": "uuid-variant-01",
+    "sku": "IPHONE15-BLACK-128",
+    "price": 22990000,
+    "stockQuantity": 20,
+    "image": {
+        "id": "uuid-img-01",
+        "imageUrl": "https://res.cloudinary.com/.../iphone-black.jpg"
+    },
+    "options": [
+        { "groupName": "Color", "value": "Black" },
+        { "groupName": "Storage", "value": "128GB" }
+    ]
+}
+```
+
+Business rules:
+
+- SKU unique trong phạm vi product.
+- Một variant không được chọn 2 value trong cùng 1 option group.
+- Không cho tạo 2 variants có cùng tổ hợp option values.
+- Nếu product có variants, Cart API phải gửi `variantId`.
 
 ---
 
@@ -290,6 +403,7 @@ POST /api/orders/checkout
     "items": [
         {
             "productId": "uuid-product-01",
+            "variantId": "uuid-variant-01",
             "quantity": 2
         },
         {
@@ -308,6 +422,9 @@ POST /api/orders/checkout
     "items": [
         {
             "productName": "Laptop ASUS ROG Strix G15",
+            "variantSku": "ROG-G15-BLACK-I7",
+            "selectedOptions": "Color: Black, CPU: i7",
+            "thumbnailUrl": "https://res.cloudinary.com/.../rog-black.jpg",
             "quantity": 2,
             "priceAtPurchase": 32990000,
             "subtotal": 65980000
@@ -323,6 +440,8 @@ POST /api/orders/checkout
     "createdAt": "2026-04-27T10:10:00"
 }
 ```
+
+> Nếu product có variants, request checkout/cart phải truyền `variantId`. Nếu product không có variants, `variantId` có thể bỏ trống và hệ thống dùng giá/tồn kho trên Product.
 
 ### 6.2 Xem đơn hàng của tôi
 ```
