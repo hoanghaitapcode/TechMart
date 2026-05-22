@@ -17,7 +17,7 @@ import java.util.UUID;
 @RequestMapping("/api/orders")
 @Tag(name = "Order", description = "Các API quản lý đơn hàng")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('CUSTOMER')")
+@PreAuthorize("hasAnyRole('CUSTOMER','VENDOR')")
 public class OrderController {
     private final OrderService orderService;
 
