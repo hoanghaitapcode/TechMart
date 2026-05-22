@@ -28,6 +28,4 @@ public class ProductRequest {
     @NotNull(message = "Số lượng không được để trống")
     @Min(value = 0, message = "Số lượng tồn kho không được âm")
     private Integer stockQuantity;
-
-    private String imageURL;
 }

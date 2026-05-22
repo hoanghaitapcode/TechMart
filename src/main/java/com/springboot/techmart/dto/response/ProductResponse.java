@@ -2,12 +2,15 @@ package com.springboot.techmart.dto.response;
 
 
 import com.springboot.techmart.entity.Product;
+import com.springboot.techmart.entity.ProductImage;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Getter @Setter
@@ -18,7 +21,8 @@ public class ProductResponse {
     private String description;
     private BigDecimal price;
     private Integer stockQuantity;
-    private String imageUrl;
+    private List<ProductImageResponse> images;
+    private String thumbnailUrl;
 
     private UUID categoryId;
     private String categoryName;
@@ -36,7 +40,20 @@ public class ProductResponse {
         response.setDescription(product.getDescription());
         response.setPrice(product.getPrice());
         response.setStockQuantity(product.getStockQuantity());
-        response.setImageUrl(product.getImageUrl());
+        List<ProductImageResponse> imageResponses = new ArrayList<>();
+        String thumbnail = null;
+
+        if(product.getProductImages()!=null && !product.getProductImages().isEmpty()){
+            for (ProductImage image : product.getProductImages()) {
+                imageResponses.add(ProductImageResponse.fromEntity(image));
+                if (image.getIsPrimary() != null && image.getIsPrimary()) {
+                    thumbnail = image.getImageUrl();
+                }
+            }
+        }
+        if(thumbnail==null) {
+            thumbnail = product.getProductImages().getFirst().getImageUrl();
+        }
 
         if (product.getCategory() != null) {
             response.setCategoryId(product.getCategory().getId());

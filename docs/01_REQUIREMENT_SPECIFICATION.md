@@ -65,6 +65,27 @@ TechMart là hệ thống E-commerce cho phép:
 
 ---
 
+### 2.3.1 Cap nhat Product Media & Variant Catalog
+
+Product khong con chi co 1 truong anh dang string. Huong moi tach product thanh product cha, gallery anh va cac bien the ban duoc.
+
+| ID | Yeu cau | Mo ta chi tiet | Do uu tien |
+|:---|:--------|:---------------|:-----------|
+| FR-PRD-07 | Quan ly gallery anh san pham | Vendor/Admin upload nhieu anh cho 1 product, dat anh primary, sap xep thu tu slider va xoa anh khong dung. | Cao |
+| FR-PRD-08 | Quan ly option group | Vendor/Admin tao nhom lua chon cho product nhu Color, Storage, Size. | Cao |
+| FR-PRD-09 | Quan ly option value | Vendor/Admin them gia tri cho tung option group nhu Black, Blue, 128GB, XL. | Cao |
+| FR-PRD-10 | Quan ly product variant | Vendor/Admin tao SKU rieng theo to hop option values; moi variant co gia, ton kho va anh dai dien tuy chon. | Cao |
+| FR-PRD-11 | Chon variant khi mua hang | Neu product co variants, Customer phai chon variant truoc khi them vao gio hoac checkout. | Cao |
+| FR-PRD-12 | Snapshot variant trong don hang | OrderItem luu lai SKU, selectedOptions, gia va thumbnail tai thoi diem mua de lich su don hang khong bi thay doi khi Vendor sua product. | Cao |
+
+Quy uoc nghiep vu:
+
+- `ProductRequest` khong nhan `imageUrl`; anh duoc upload qua API rieng sau khi tao product.
+- `Product.price` va `Product.stockQuantity` chi la fallback cho product khong co variants.
+- Neu product co variants, cart/checkout dung `ProductVariant.price` va `ProductVariant.stockQuantity`.
+
+---
+
 ### 2.4 Module Ví điện tử (Wallet & Transactions)
 
 | ID | Yêu cầu | Mô tả chi tiết | Độ ưu tiên |

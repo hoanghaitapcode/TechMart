@@ -7,7 +7,9 @@ import lombok.Setter;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
+import javax.swing.*;
 import java.math.BigDecimal;
+import java.util.List;
 
 // Product CÓ @Version (Optimistic Locking) → câu SQL DELETE cần 2 tham số: id và version
 // Thứ tự tham số: Hibernate truyền (id, version) theo đúng thứ tự WHERE
@@ -38,8 +40,9 @@ public class Product extends BaseEntity {
     @JoinColumn(name = "vendor_id")
     private User vendor;
 
-    @Column(name = "image_url")
-    private String imageUrl;
+    @OneToMany(mappedBy="product",cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("sortOrder ASC") // Sắp xếp theo sortOrder tăng dần
+    private List<ProductImage> productImages;
 
     // @Version kích hoạt Optimistic Locking — bảo vệ khỏi race condition
     // Khi UPDATE/DELETE, Hibernate tự động thêm "AND version=?" vào WHERE clause

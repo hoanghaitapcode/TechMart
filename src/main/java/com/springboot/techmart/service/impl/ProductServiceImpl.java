@@ -1,8 +1,10 @@
 package com.springboot.techmart.service.impl;
 
+import com.springboot.techmart.dto.request.ProductImageRequest;
 import com.springboot.techmart.dto.request.ProductRequest;
 import com.springboot.techmart.dto.request.ProductSearchCriteria;
 import com.springboot.techmart.dto.response.PageResponse;
+import com.springboot.techmart.dto.response.ProductImageResponse;
 import com.springboot.techmart.dto.response.ProductResponse;
 import com.springboot.techmart.entity.Category;
 import com.springboot.techmart.entity.Product;
@@ -50,7 +52,6 @@ public class ProductServiceImpl implements ProductService {
         product.setPrice(request.getPrice());
         product.setStockQuantity(request.getStockQuantity());
         product.setCategory(category);
-        product.setImageUrl(request.getImageURL());
         product.setVendor(vendor); // Gọn vendor từ JWT, không từ request body
 
         Product savedProduct = productRepository.save(product);
@@ -98,7 +99,6 @@ public class ProductServiceImpl implements ProductService {
         product.setDescription(request.getDescription());
         product.setPrice(request.getPrice());
         product.setStockQuantity(request.getStockQuantity());
-        product.setImageUrl(request.getImageURL());
         Product updatedProduct = productRepository.save(product);
 
         return ProductResponse.fromEntity(updatedProduct);
