@@ -13,6 +13,7 @@ import org.apache.coyote.Response;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,6 +26,7 @@ import java.util.UUID;
 public class ProductController {
     private final ProductService productService;
 
+    @PreAuthorize("hasAnyRole('VENDOR', 'ADMIN')")
     @Operation(summary = "Tạo mới sản phẩm",
     description = "Tạo mới một sản phẩm với thông tin chi tiết như tên, mô tả, giá cả, và danh mục. API này sẽ trả về sản phẩm vừa được tạo với mã ID duy nhất.")
     @PostMapping
@@ -49,6 +51,8 @@ public class ProductController {
     public ResponseEntity<List<ProductResponse>> getAllProducts() {
         return ResponseEntity.ok(productService.GetAllProducts());
     }
+
+    @PreAuthorize("hasAnyRole('VENDOR', 'ADMIN')")
     @Operation(summary = "Cập nhật sản phẩm",
                description = "Cập nhật thông tin sản phẩm theo ID. API này sẽ nhận vào một đối tượng ProductRequest chứa các trường cần cập nhật và trả về sản phẩm đã được cập nhật sau khi thực hiện thành công.")
     @PutMapping("/{id}")
@@ -56,6 +60,7 @@ public class ProductController {
         return ResponseEntity.ok(productService.UpdateProduct(id, request));
     }
 
+    @PreAuthorize("hasAnyRole('VENDOR', 'ADMIN')")
     @Operation(summary = "Xóa sản phẩm",
                description = "Xóa một sản phẩm theo ID. API này sẽ thực hiện xóa sản phẩm khỏi hệ thống và trả về mã trạng thái HTTP 204 No Content nếu xóa thành công.")
     @DeleteMapping("/{id}")

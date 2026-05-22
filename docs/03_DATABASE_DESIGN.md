@@ -132,7 +132,7 @@ erDiagram
 | stock_quantity | INT | - | Số lượng tồn kho |
 | category_id | UUID | FK → categories.id | Thuộc danh mục nào |
 | vendor_id | UUID | FK → users.id | Người bán nào đăng sản phẩm |
-| image_url | VARCHAR | - | Đường dẫn ảnh sản phẩm |
+| image_url | VARCHAR | Deprecated | Ảnh cũ dạng string; hướng mới dùng bảng `product_images` |
 | version | BIGINT | @Version | Optimistic Locking (chống overselling) |
 | created_at | TIMESTAMP | Auto-gen | - |
 | updated_at | TIMESTAMP | Auto-update | - |
@@ -172,6 +172,39 @@ erDiagram
 ---
 
 ## 3. GHI CHÚ THIẾT KẾ QUAN TRỌNG
+
+### 3.0 Cập nhật Product Media & Variant Catalog
+
+Thiết kế ban đầu có `products.image_url` là 1 chuỗi ảnh duy nhất. Hướng mới tách ảnh và variant ra thành các bảng riêng để hỗ trợ gallery, thumbnail, option và SKU theo biến thể.
+
+Các bảng cần bổ sung:
+
+| Bảng | Mục đích |
+|:----|:--------|
+| `product_images` | Lưu nhiều ảnh cho 1 product, gồm `image_url`, `public_id`, `alt_text`, `sort_order`, `is_primary` |
+| `product_option_groups` | Nhóm option của product, ví dụ Color, Storage, Size |
+| `product_option_values` | Giá trị của từng nhóm option, ví dụ Black, Blue, 128GB |
+| `product_variants` | Biến thể bán được, gồm `sku`, `price`, `stock_quantity`, `image_id` |
+| `product_variant_option_values` | Bảng nối variant với các option value đã chọn |
+
+Quan hệ mới:
+
+```mermaid
+erDiagram
+    PRODUCTS ||--o{ PRODUCT_IMAGES : has
+    PRODUCTS ||--o{ PRODUCT_OPTION_GROUPS : has
+    PRODUCT_OPTION_GROUPS ||--o{ PRODUCT_OPTION_VALUES : has
+    PRODUCTS ||--o{ PRODUCT_VARIANTS : has
+    PRODUCT_VARIANTS }o--o{ PRODUCT_OPTION_VALUES : chooses
+    PRODUCT_IMAGES ||--o{ PRODUCT_VARIANTS : "optional image"
+```
+
+Quy ước:
+
+- `Product.price` và `Product.stock_quantity` là fallback cho sản phẩm không có variants.
+- Nếu product có variants, cart/checkout phải dùng `ProductVariant.price` và `ProductVariant.stock_quantity`.
+- `CartItem` nên thêm `variant_id` nullable.
+- `OrderItem` nên snapshot thêm `variant_sku`, `selected_options`, `thumbnail_url` để lịch sử đơn hàng không bị thay đổi khi Vendor chỉnh product sau này.
 
 ### 3.1 Tại sao `price_at_purchase` trong `order_items`?
 Giá sản phẩm có thể thay đổi bất kỳ lúc nào (Vendor giảm giá, tăng giá). Nếu lưu `product_id` rồi JOIN sang bảng `products` để lấy giá, thì khi Vendor đổi giá, tất cả đơn hàng cũ sẽ bị hiển thị sai tổng tiền.  

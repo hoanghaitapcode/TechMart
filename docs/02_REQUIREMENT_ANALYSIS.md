@@ -99,6 +99,29 @@ graph LR
 
 ---
 
+### 2.1.1 Cap nhat Checkout khi Product co Variant
+
+Neu product co variants, luong checkout khong chi nhan `(productId, quantity)` nua ma can nhan them `variantId`.
+
+Luồng chính cập nhật:
+
+1. Customer chọn product và tổ hợp option trên Frontend.
+2. Frontend gửi `productId`, `variantId`, `quantity`.
+3. Hệ thống kiểm tra variant thuộc đúng product.
+4. Giá hiện tại lấy từ `ProductVariant.price`.
+5. Tồn kho lấy từ `ProductVariant.stockQuantity`.
+6. Khi tạo OrderItem, hệ thống snapshot `variantSku`, `selectedOptions`, `thumbnailUrl`, `priceAtPurchase`.
+
+Luồng ngoại lệ bổ sung:
+
+| Điều kiện lỗi | Xử lý |
+|:--------------|:------|
+| Product có variants nhưng request không gửi `variantId` | Trả lỗi 400: "Vui lòng chọn phân loại sản phẩm" |
+| `variantId` không thuộc product | Trả lỗi 400: "Biến thể không thuộc sản phẩm này" |
+| Tổ hợp variant đã hết hàng | Trả lỗi 400: "Biến thể đã hết hàng" |
+
+---
+
 ### 2.2 UC-09: Hủy đơn hàng
 
 **Actor:** Customer  
@@ -195,6 +218,20 @@ flowchart LR
 | `GET /api/wallet/transactions` | ✅ | ✅ | ✅ |
 | `GET /api/admin/stats` | ❌ | ❌ | ✅ |
 | `GET /api/admin/users` | ❌ | ❌ | ✅ |
+
+---
+
+### 4.1 Cap nhat quyen cho Product Media & Variant
+
+| API Endpoint | Customer | Vendor | Admin |
+|:-------------|:--------:|:------:|:-----:|
+| `POST /api/products/{id}/images` | No | Owner | Yes |
+| `DELETE /api/products/{id}/images/{imageId}` | No | Owner | Yes |
+| `POST /api/products/{id}/option-groups` | No | Owner | Yes |
+| `POST /api/products/{id}/option-groups/{groupId}/values` | No | Owner | Yes |
+| `POST /api/products/{id}/variants` | No | Owner | Yes |
+| `PUT /api/products/{id}/variants/{variantId}` | No | Owner | Yes |
+| `DELETE /api/products/{id}/variants/{variantId}` | No | Owner | Yes |
 
 ---
 

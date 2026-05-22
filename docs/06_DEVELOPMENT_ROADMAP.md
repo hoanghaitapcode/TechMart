@@ -21,7 +21,7 @@
 | | | **═══ NÂNG CAO (Advanced) ═══** | |
 | 10 | Discount & Voucher | Promotion Engine, Coupon Code, Flash Sale | ⬜ |
 | 11 | Payment Gateway | VNPay Sandbox, Webhook, Payment Strategy | ⬜ |
-| 12 | Advanced E-commerce | Review/Rating, Notification, Image Upload, Caching | ⬜ |
+| 12 | Advanced E-commerce | Review/Rating, Product Media & Variants, Notification, Caching | ⬜ |
 
 ---
 
@@ -562,11 +562,19 @@ Bổ sung các tính năng nâng cao biến TechMart thành một sàn thương 
 - [ ] Tính `averageRating` cho Product (dùng Native SQL: AVG)
 - [ ] API: Tạo review, Xem review theo sản phẩm (có phân trang)
 
-#### 12.2 — Image Upload (Tải ảnh sản phẩm)
+#### 12.2 — Product Media & Variant Catalog
 - [ ] Tích hợp Cloudinary hoặc AWS S3 để lưu trữ ảnh
-- [ ] API `POST /api/uploads/image` — Upload ảnh, trả về URL
+- [ ] API `POST /api/products/{productId}/images` — Upload ảnh và gắn vào sản phẩm
 - [ ] Hỗ trợ nhiều ảnh cho 1 sản phẩm (Entity `ProductImage`)
 - [ ] Validate: Kích thước file ≤ 5MB, chỉ chấp nhận jpg/png/webp
+- [ ] Bỏ `imageUrl` string khỏi `ProductRequest`; ảnh đi qua `ImageService`
+- [ ] Entity `ProductOptionGroup` — nhóm lựa chọn như Color, Storage, Size
+- [ ] Entity `ProductOptionValue` — giá trị lựa chọn như Black, 128GB, XL
+- [ ] Entity `ProductVariant` — SKU, giá, tồn kho, ảnh riêng tùy chọn
+- [ ] API quản lý option groups, option values và variants cho Vendor/Admin
+- [ ] Cập nhật Cart: thêm `variantId`, tính giá/tồn kho/ảnh theo variant nếu có
+- [ ] Cập nhật Order: snapshot variantSku, selectedOptions, thumbnailUrl tại thời điểm mua
+- [ ] Test: tạo product -> upload images -> tạo options -> tạo variants -> add variant vào cart -> checkout
 
 #### 12.3 — Notification (Thông báo)
 - [ ] Entity `Notification` (userId, title, message, isRead, type)
@@ -695,7 +703,7 @@ Phase 11: Payment Gateway ★★★★★
 Phase 12: Advanced E-commerce
     │
     ├── Review & Rating (AVG, chỉ review khi đã mua)
-    ├── Image Upload (Cloudinary / S3)
+    ├── Product Media & Variants (Cloudinary / S3, SKU, options)
     ├── Notification (WebSocket realtime)
     ├── Caching (Redis / Spring Cache)
     └── Email Service (Spring Mail, Thymeleaf)

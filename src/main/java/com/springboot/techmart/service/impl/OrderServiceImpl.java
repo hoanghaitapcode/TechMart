@@ -57,7 +57,7 @@ public class OrderServiceImpl implements OrderService {
         Order order = new Order();
         order.setCustomer(wallet.getUser());
         order.setTotalAmount(totalAmount);
-        order.setStatus(Status.PAID);
+        order.setStatus(Status.PENDING);
 
         List<OrderItem> orderItems = new ArrayList<>();
         for (CartItem item : cart.getItems()) {
