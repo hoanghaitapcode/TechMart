@@ -6,14 +6,12 @@ import com.springboot.techmart.dto.request.ProductSearchCriteria;
 import com.springboot.techmart.dto.response.PageResponse;
 import com.springboot.techmart.dto.response.ProductImageResponse;
 import com.springboot.techmart.dto.response.ProductResponse;
-import com.springboot.techmart.entity.Category;
-import com.springboot.techmart.entity.Product;
-import com.springboot.techmart.entity.Role;
-import com.springboot.techmart.entity.User;
+import com.springboot.techmart.entity.*;
 import com.springboot.techmart.exception.ForbiddenException;
 import com.springboot.techmart.exception.ResourceNotFoundException;
 import com.springboot.techmart.repository.CategoryRepository;
 import com.springboot.techmart.repository.ProductRepository;
+import com.springboot.techmart.repository.ShopRepository;
 import com.springboot.techmart.repository.UserRepository;
 import com.springboot.techmart.security.SecurityUtils;
 import com.springboot.techmart.service.ProductService;
@@ -33,6 +31,7 @@ public class ProductServiceImpl implements ProductService {
     private final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
+    private final ShopRepository shopRepository;
 
     @Override
     public ProductResponse CreateProduct(ProductRequest request) {
@@ -43,7 +42,7 @@ public class ProductServiceImpl implements ProductService {
 
         // Lấy vendor từ JWT Token (tránh IDOR: không tin vào vendorId do client gửi lên)
         UUID vendorId = SecurityUtils.getCurrentUserId();
-        User vendor = userRepository.findById(vendorId)
+        Shop vendor = shopRepository.findByOwnerId(vendorId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy vendor"));
 
         Product product = new Product();

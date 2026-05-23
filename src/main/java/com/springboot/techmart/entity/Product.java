@@ -38,7 +38,7 @@ public class Product extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "vendor_id")
-    private User vendor;
+    private Shop vendor;
 
     @OneToMany(mappedBy="product",cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("sortOrder ASC") // Sắp xếp theo sortOrder tăng dần

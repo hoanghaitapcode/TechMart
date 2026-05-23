@@ -62,7 +62,7 @@ public class ProductResponse {
 
         if (product.getVendor() != null) {
             response.setVendorId(product.getVendor().getId());
-            response.setVendorName(product.getVendor().getUsername()); // Assuming User has getUsername()
+            response.setVendorName(product.getVendor().getShopName()); // Assuming User has getUsername()
         }
 
         return response;

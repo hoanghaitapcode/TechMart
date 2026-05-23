@@ -3,13 +3,11 @@ package com.springboot.techmart.service.impl;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.springboot.techmart.dto.response.ProductImageResponse;
-import com.springboot.techmart.entity.Product;
-import com.springboot.techmart.entity.ProductImage;
-import com.springboot.techmart.entity.Role;
-import com.springboot.techmart.entity.User;
+import com.springboot.techmart.entity.*;
 import com.springboot.techmart.exception.BadRequestException;
 import com.springboot.techmart.repository.ProductImageRepository;
 import com.springboot.techmart.repository.ProductRepository;
+import com.springboot.techmart.repository.ShopRepository;
 import com.springboot.techmart.repository.UserRepository;
 import com.springboot.techmart.security.SecurityUtils;
 import com.springboot.techmart.service.ImageService;
@@ -31,6 +29,7 @@ public class ImageServiceImpl implements ImageService {
     private final ProductImageRepository productImageRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
+    private final ShopRepository shopRepository;
 
 
     private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -92,6 +91,7 @@ public class ImageServiceImpl implements ImageService {
         if(!image.getProduct().getId().equals(productId)) {
             throw new BadRequestException("Ảnh không thuộc về sản phẩm");
         }
+        checkOwnership(image.getProduct());
         try {
             cloudinary.uploader().destroy(image.getPublicId(), ObjectUtils.asMap(
                     "resource_type", "image"
@@ -114,7 +114,7 @@ public class ImageServiceImpl implements ImageService {
         checkOwnership(currentImage.getProduct());
 
 
-        Optional<ProductImage> optionalImage = productImageRepository.findByProductIdAndIsPrimaryTrue(imageId);
+        Optional<ProductImage> optionalImage = productImageRepository.findByProductIdAndIsPrimaryTrue(productId);
         if(optionalImage.isPresent()) {
             ProductImage currentPrimary = optionalImage.get();
             currentPrimary.setIsPrimary(false);
@@ -143,7 +143,10 @@ public class ImageServiceImpl implements ImageService {
         UUID currentUserId = SecurityUtils.getCurrentUserId();
         User currentUser = userRepository.findById(currentUserId)
                 .orElseThrow(() -> new BadRequestException("Không tìm thấy người dùng"));
-        if(currentUser.getRole()!= Role.ADMIN || !currentUserId.equals(product.getVendor().getId())) {
+        Shop vendor = shopRepository.findByOwnerId(currentUserId)
+                .orElseThrow(() -> new BadRequestException("Không tìm thấy shop của người dùng"));
+        UUID vendorId = vendor.getId();
+        if(currentUser.getRole()!= Role.ADMIN && !vendorId.equals(product.getVendor().getId())) {
             throw new BadRequestException("Bạn không có quyền thực hiện hành động này");
         }
 

@@ -8,10 +8,13 @@ import org.springframework.context.annotation.Configuration;
 
 import java.util.HashMap;
 import java.util.Map;
+import lombok.Getter;
+import lombok.Setter;
 
 
 @Configuration
 @ConfigurationProperties(prefix = "cloudinary")
+@Getter @Setter
 public class CloudinaryConfig {
     private String cloudName;
     private String apiKey;
